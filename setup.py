@@ -9,7 +9,7 @@ def _is_hip() -> bool:
 is_hip = _is_hip()
 
 if is_hip:
-    print("ROCm environment detected. Running hipify...")
+    print("ROCm environment detected.")
 else:
     print("CUDA environment detected.")
 
@@ -21,7 +21,7 @@ else:
 
 extra_compile_args = {}
 define_macros = []
-name="torchac_"
+name="torchac_cuda"
 
 if is_hip:
     rocm_home = os.environ.get('ROCM_HOME', '/opt/rocm')
@@ -31,11 +31,9 @@ if is_hip:
     extra_compile_args['hip'] = [f'-I{hip_include}', f'-I{hipcub_include}']
     define_macros.append(('__HIP_PLATFORM_HCC__', '1'))
     define_macros.append(('__HIP_PLATFORM_AMD__', '1'))
-    name += "rocm"
-else:
+#else:
     #extra_compile_args['nvcc'] = ['--compiler-options', "'-fPIC'"]
     #extra_compile_args['cxx'] = ['-static-libgcc', '-static-libstdc++'],
-    name += "cuda"
 
 setup(
     name = name,
@@ -60,3 +58,9 @@ setup(
         "torch >= 2.1.0",
     ]
 )
+
+if is_hip:
+    print("ROCm build completed.")
+else:
+    print("CUDA build completed.")
+
