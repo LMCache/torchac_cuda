@@ -10,7 +10,7 @@ setup(
     include_package_data = True,
     ext_modules=[
         cpp_extension.CUDAExtension(
-            'torchac_cuda', 
+            'torchac_cuda',
             [
                 'main.cpp',
                 'torchac_kernel_enc_new.cu',
@@ -23,12 +23,12 @@ setup(
             },
             include_dirs=['./include']
             ),
-        
+
     ],
     cmdclass={
         'build_ext': cpp_extension.BuildExtension
     },
     install_requires = [
-        "torch >= 2.1.0",
+        "torch == 2.6.0",
     ]
 )
