@@ -6,15 +6,18 @@ from torch.utils import cpp_extension
 def _is_hip() -> bool:
         return torch.version.hip is not None or os.environ.get('HIP_PLATFORM') == 'amd'
 
-is_hip = _is_hip()
+def _hipify():
+    import subprocess
+    hipify_files = ["cal_cdf.cu", "main.cpp", "torchac_kernel.cuh",
+        "torchac_kernel_dec_new.cu", "torchac_kernel_enc_new.cu"]
+    subprocess.run(["rm", "-rf", "hip_output"])
+    subprocess.run(["python", "hipify.py", "-p", ".", "-o", "hip_output"] + hipify_files)
 
-if is_hip:
-    print("ROCm environment detected.")
-else:
-    print("CUDA environment detected.")
+is_hip = _is_hip()
 
 source_files = []
 if is_hip:
+    _hipify()
     source_files.extend(['main_hip.cpp', 'cal_cdf.hip', 'torchac_kernel_dec_new.hip', 'torchac_kernel_enc_new.hip'])
 else:
     source_files.extend(['main.cpp', 'cal_cdf.cu', 'torchac_kernel_dec_new.cu', 'torchac_kernel_enc_new.cu'])
@@ -36,7 +39,7 @@ if is_hip:
     #extra_compile_args['cxx'] = ['-static-libgcc', '-static-libstdc++'],
 
 setup(
-    name = name,
+    name = "torchac_cuda",
     version = '0.2.5',
     description = 'GPU based arithmetic coding for LLM KV compression',
     author = 'Yihua Cheng',
@@ -44,7 +47,7 @@ setup(
     include_package_data = True,
     ext_modules=[
         cpp_extension.CUDAExtension(
-            name,
+            "torchac_cuda",
 			source_files,
             extra_compile_args=extra_compile_args,
 			include_dirs=['./include', hip_include, hipcub_include] if is_hip else ['./include'],
@@ -58,9 +61,4 @@ setup(
         "torch >= 2.1.0",
     ]
 )
-
-if is_hip:
-    print("ROCm build completed.")
-else:
-    print("CUDA build completed.")
 
