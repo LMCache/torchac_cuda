@@ -11,6 +11,7 @@ def _hipify():
     hipify_files = ["cal_cdf.cu", "main.cpp", "torchac_kernel.cuh",
         "torchac_kernel_dec_new.cu", "torchac_kernel_enc_new.cu"]
     subprocess.run(["rm", "-rf", "hip_output"])
+    subprocess.run(["mkdir", "hip_output"])
     subprocess.run(["python", "hipify.py", "-p", ".", "-o", "hip_output"] + hipify_files)
 
 is_hip = _is_hip()
